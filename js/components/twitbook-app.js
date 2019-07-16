@@ -6,7 +6,9 @@ import './data/twitbook-login.js';
 import './data/twitbook-store.js';
 import '../../service-worker.js';
 
-import firebase from 'firebase/app';
+import AppTweet from './tweet/tweet.js'
+
+import firebase from '@firebase/app';
 
 class TwitbookApp extends LitElement {
 

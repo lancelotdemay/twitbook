@@ -1,12 +1,12 @@
 ((document) => {
     const firebaseConfig = {
-      apiKey: "AIzaSyAFUZu2JppQczSYCAvRNbMYiEfUKR7a8Fk",
-      authDomain: "twitbook-3be3d.firebaseapp.com",
-      databaseURL: "https://twitbook-3be3d.firebaseio.com",
-      projectId: "twitbook-3be3d",
-      storageBucket: "",
-      messagingSenderId: "743222806653",
-      appId: "1:743222806653:web:63294ab0b9e1fcda"
+        apiKey: "AIzaSyAcdj_MNoiVPm1NfsUvCamSrR4rKU7nOIU",
+        authDomain: "twitbook-e9e30.firebaseapp.com",
+        databaseURL: "https://twitbook-e9e30.firebaseio.com",
+        projectId: "twitbook-e9e30",
+        storageBucket: "twitbook-e9e30.appspot.com",
+        messagingSenderId: "1053569639553",
+        appId: "1:1053569639553:web:c4aa993704ea8ca7"
     };
   
         document.config = firebaseConfig;
