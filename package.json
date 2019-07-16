@@ -1,0 +1,20 @@
+{
+  "name": "esgi-pwa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "service-worker.js",
+  "scripts": {
+    "generate": "npx workbox generateSW",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "polymer-cli": "^1.9.8",
+    "workbox-cli": "^4.2.0"
+  },
+  "dependencies": {
+    "idb": "^4.0.3",
+    "lit-element": "^2.1.0"
+  }
+}
