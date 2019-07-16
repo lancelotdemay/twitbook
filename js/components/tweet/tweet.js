@@ -120,7 +120,7 @@ export default class AppTweet extends LitElement {
     };
   }
 
-  initTweet(username, date, src, description) {
+  initTweet(username, src, date, description) {
     this.username = username;
     this.date = date;
     this.src = src;
@@ -138,14 +138,22 @@ export default class AppTweet extends LitElement {
         .tweet .placeholder {
           background-image: url("${this.placeholder}");
         }
+
+        .displayed {
+            display: inline;
+        }
+
+        .hidden {
+          display: none;
+        }
       </style>
       <article class="tweet">
         <header>
           <p>${this.username} - ${this.date}</p>
         </header>
         <main>
-          <p>${this.description.substring(0, 144)}...</p>
-        
+          <p>${this.description}</p>
+         <!-- <img class="${this.src != undefined ? "displayed" : "hidden"}" src="${this.src}" /> -->
         </main>
       </article>
     `;
