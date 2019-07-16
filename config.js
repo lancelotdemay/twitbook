@@ -1,12 +1,13 @@
 ((document) => {
     const firebaseConfig = {
-        apiKey: "AIzaSyCT9ZqZfOO0KidosQJHmVb_uRc_orB6sK0",
-        authDomain: "esgi-firebase.firebaseapp.com",
-        databaseURL: "https://esgi-firebase.firebaseio.com",
-        projectId: "esgi-firebase",
-        storageBucket: "esgi-firebase.appspot.com",
-        messagingSenderId: "628437323114",
-        appId: "1:628437323114:web:c8639cb0fdf91ccf"
-      };
-      document.config = firebaseConfig;
-})(document);
+      apiKey: "AIzaSyAFUZu2JppQczSYCAvRNbMYiEfUKR7a8Fk",
+      authDomain: "twitbook-3be3d.firebaseapp.com",
+      databaseURL: "https://twitbook-3be3d.firebaseio.com",
+      projectId: "twitbook-3be3d",
+      storageBucket: "",
+      messagingSenderId: "743222806653",
+      appId: "1:743222806653:web:63294ab0b9e1fcda"
+    };
+  
+        document.config = firebaseConfig;
+  })(document);
