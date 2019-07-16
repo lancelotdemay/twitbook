@@ -23,23 +23,19 @@ workbox.core.skipWaiting();
  */
 self.__precacheManifest = [
   {
-    "url": "data/spacex.json",
-    "revision": "2150fc7de9da187b7b557ec2e32a8ed6"
-  },
-  {
     "url": "index.html",
     "revision": "f2528149d9d66ea615ef74f966ccd379"
   },
   {
-    "url": "js/app.js",
+    "url": "js/components/twitbook-app.js",
     "revision": "5862b248707152dab582b166c9b87958"
   },
   {
-    "url": "js/components/card/card.css",
+    "url": "js/components/tweet/tweet.css",
     "revision": "d3b1a7395580881da60716ae41a3ce52"
   },
   {
-    "url": "js/components/card/card.js",
+    "url": "js/components/tweet/tweet.js",
     "revision": "0c646b202fed32e4d36f76c47115e375"
   }
 ].concat(self.__precacheManifest || []);
