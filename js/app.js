@@ -2,6 +2,10 @@ import AppTweet from '/js/components/tweet/tweet.js';
 import { openDB } from 'idb';
 import checkConnectivity from '/js/connection.js';
 
+import './components/user/user-auth.js';
+
+import firebase from 'firebase/app';
+
 (async function(document) {
   const app = document.querySelector('#app');
   const skeleton = app.querySelector('.skeleton');
