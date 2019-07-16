@@ -61,4 +61,4 @@ export class TwitbookLogin extends LitElement {
         `;
     }
 }
-customElements.define('twitbook-login', TwtibookLogin);
+customElements.define('twitbook-login', TwitbookLogin);
