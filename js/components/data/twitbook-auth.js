@@ -2,7 +2,7 @@ import { LitElement, html } from 'lit-element';
 import firebase from 'firebase/app';
 import 'firebase/auth';
 
-export class UserAuth extends LitElement {
+export class TwitbookAuth extends LitElement {
 
     static getStyles() {
         return css`
@@ -12,11 +12,11 @@ export class UserAuth extends LitElement {
         `;
     }
 
-    static getProperties(){
+    static get properties(){
         return {
             email: String,
-            password: String
-        };
+            password: String,
+        }
     }
 
     firstUpdated(){
@@ -25,19 +25,19 @@ export class UserAuth extends LitElement {
 
     handlePost(e){
         e.preventDefault();
-        if(!this.email | !this.password) return console.error('Email or password are empty');
-        this.auth.createUserWithEmailAndPassword(this.email, this.password);
+        if(!this.email | !this.password) return console.error('Email or password are empty or wrong');
+        this.auth.createUserWithEmailAndPassword(this.email, this.password)
     }
 
     render() {
         return html`
-            <h1>Créer un compte</h1>
+        <h4>Create user</h4>
             <form @submit="${this.handlePost}"> 
                 <input type="text" @input="${e => this.email = e.target.value}">
                 <input type="password" @input="${e => this.password = e.target.value}">
-                <button type="submit">S'inscrire</button>
-            </form>
+                <button type="submit">Enregistrer</button>
+    </form>
         `;
     }
 }
-customElements.define('user-auth', UserAuth);
+customElements.define('twitbook-auth', TwitbookAuth);

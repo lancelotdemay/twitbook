@@ -1,6 +1,5 @@
 import { LitElement } from "lit-element";
 
-
 export default class AppUser extends LitElement {
     constructor() {
       super();
@@ -23,6 +22,5 @@ export default class AppUser extends LitElement {
           birthdate: { type: Date },
           creation_date: { type: Date },
         };
-      }
-
+    }
 }
