@@ -16,6 +16,7 @@
   "dependencies": {
     "@firebase/app": "^0.4.10",
     "@firebase/firestore": "^1.4.4",
+    "@syu93/lit-router": "^0.2.1",
     "firebase": "^6.3.0",
     "idb": "^4.0.3",
     "lit-element": "^2.1.0",

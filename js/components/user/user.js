@@ -23,4 +23,15 @@ export default class AppUser extends LitElement {
           creation_date: { type: Date },
         };
     }
+
+    render() {
+      return html`
+        <div class="">
+          <div>
+            <p> ${this.name} </p>
+            <p> ${this.username} </p>
+          </div>
+        </div>
+      `;
+    }
 }

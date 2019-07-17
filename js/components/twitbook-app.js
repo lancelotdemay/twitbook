@@ -4,7 +4,9 @@ import './data/twitbook-data.js';
 import './data/twitbook-auth.js';
 import './data/twitbook-login.js';
 import './data/twitbook-store.js';
-import '../../service-worker.js';
+// import '../../service-worker.js';
+// import '../../router.js';
+
 
 import AppTweet from './tweet/tweet.js'
 
@@ -19,8 +21,13 @@ class TwitbookApp extends LitElement {
    this.tweet = null;
    this.tweets = [];
    this.logged = false;
- }
 
+   document.addEventListener('page-changed', () => {
+    const router = document.$router;
+    this.page = router.getCurrentPage();
+   });
+ }
+ 
  static get properties() {
    return {
      unresolved: {
@@ -31,7 +38,8 @@ class TwitbookApp extends LitElement {
      user: Object,
      tweet: AppTweet,
      tweet: Array,
-     logged: Boolean
+     logged: Boolean,
+     page: String
    };
  }
 
@@ -119,6 +127,7 @@ class TwitbookApp extends LitElement {
        <slot name="header"></slot>
        <main>
          ${console.log(this.logged)}
+         ${console.log(this.page)}
          ${ !this.logged ?
            html`
              <twitbook-auth></twitbook-auth>
@@ -153,7 +162,7 @@ class TwitbookApp extends LitElement {
      </section>
    `;
  }
-
+//  <profileUser name="profileUser" ?active="${this.page == 'profileUser'}">Mon Profil</profileUser>
  tweetAdded(e) {
    this.tweets = e.detail;
    setTimeout(function () {
@@ -199,25 +208,25 @@ class TwitbookApp extends LitElement {
   }
 }
 
- subscribe() {
-  if (('serviceWorker' in navigator) || ('PushManager' in window)) {
-    Notification.requestPermission()
-      .then((result) => {
-        if (result === 'denied') {
-          console.log('Permission wasn\'t granted. Allow a retry.');
-          return;
-        }
-        if (result === 'default') {
-          console.log('The permission request was dismissed.');
-          return;
-        }
-        console.log('Notification granted', result);
-        this.sendSubscription();
-        this.urlBase64ToUint8Array(document.config.publicKey);
-        // Do something with the granted permission.
-      });
+  subscribe() {
+    if (('serviceWorker' in navigator) || ('PushManager' in window)) {
+      Notification.requestPermission()
+        .then((result) => {
+          if (result === 'denied') {
+            console.log('Permission wasn\'t granted. Allow a retry.');
+            return;
+          }
+          if (result === 'default') {
+            console.log('The permission request was dismissed.');
+            return;
+          }
+          console.log('Notification granted', result);
+          this.sendSubscription();
+          this.urlBase64ToUint8Array(document.config.publicKey);
+          // Do something with the granted permission.
+        });
+    }
   }
-}
   
   urlBase64ToUint8Array(base64String) {
     const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -231,7 +240,13 @@ class TwitbookApp extends LitElement {
     for (let i = 0; i < rawData.length; ++i) {
       outputArray[i] = rawData.charCodeAt(i);
     }
+
     return outputArray;
   }
+
+  profil() {  
+    this.urlBase64ToUint8Array(document.config.publicKey);
+  }
+  
 }
 customElements.define('twitbook-app', TwitbookApp);
