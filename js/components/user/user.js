@@ -1,4 +1,4 @@
-import { LitElement } from "lit-element";
+import { LitElement, html } from "lit-element";
 
 export default class AppUser extends LitElement {
     constructor() {
@@ -28,10 +28,10 @@ export default class AppUser extends LitElement {
       return html`
         <div class="">
           <div>
-            <p> ${this.name} </p>
-            <p> ${this.username} </p>
+          jjjjjjj
           </div>
         </div>
       `;
     }
 }
+customElements.define('app-user', AppUser);

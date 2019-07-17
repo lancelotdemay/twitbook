@@ -120,6 +120,9 @@ class TwitbookApp extends LitElement {
 
  render() {
    return html`
+   <main id="view">
+   <app-user name="user" ?active="${this.page == 'user'}"></app-user>
+</main>
      <section>
        <twitbook-store
        collection="tweets"
@@ -134,6 +137,7 @@ class TwitbookApp extends LitElement {
              <twitbook-login @user-logged="${this.handleLogin}"></twitbook-login>
             `: html`
              <h2>Hi, ${this.user.email}</h2>
+             <button @click="${this.getUserPage}">Mon Profil</button>
              <button @click="${this.subscribe}">subscribe</button>
              <ul>
                ${this.tweets.map(tweet => html`
@@ -226,6 +230,10 @@ class TwitbookApp extends LitElement {
           // Do something with the granted permission.
         });
     }
+  }
+
+  getUserPage(){
+    document.location.href="http://127.0.0.1:8081/user";
   }
   
   urlBase64ToUint8Array(base64String) {
