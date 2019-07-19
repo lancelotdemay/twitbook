@@ -15,11 +15,6 @@ class TwitbookHeader extends LitElement {
             border-bottom: solid 1px #eeeeee;
             align-items: center;
         }
-        img {
-            height: 42px;
-            width: 42px;
-            display: block;
-        }
         `;
     }
 

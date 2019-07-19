@@ -4,13 +4,10 @@ import './data/twitbook-data.js';
 import './data/twitbook-auth.js';
 import './data/twitbook-login.js';
 import './data/twitbook-store.js';
-// import '../../service-worker.js';
-// import '../../router.js';
 
-
-import AppTweet from './tweet/tweet.js'
 
 import firebase from '@firebase/app';
+import moment from 'moment';
 
 class TwitbookApp extends LitElement {
 
@@ -18,8 +15,10 @@ class TwitbookApp extends LitElement {
    super();
    this.user = {};
    this.users = [];
-   this.tweet = null;
+   this.tweet = "";
    this.tweets = [];
+   this.likes = [];
+   this.retweets = [];
    this.logged = false;
 
    document.addEventListener('page-changed', () => {
@@ -27,7 +26,7 @@ class TwitbookApp extends LitElement {
     this.page = router.getCurrentPage();
    });
  }
- 
+
  static get properties() {
    return {
      unresolved: {
@@ -36,73 +35,56 @@ class TwitbookApp extends LitElement {
      },
      users: Array,
      user: Object,
-     tweet: AppTweet,
-     tweet: Array,
      logged: Boolean,
-     page: String
+     page: String,
+     tweet: String,
+     tweets: Array,
+     logged: Boolean,
+     likes: Array,
+     retweets: Array,
    };
  }
 
  static get styles() {
     return css`
-      :host {
-        display: block;
-      }
-      * {  box-sizing: border-box }
-      footer {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-      }
-      footer form {
-        display: flex;
-        justify-content: space-between;
-        background-color: #ffffff;
-        padding: 0.5rem 1rem;
-        width: 100%;
-      }
-      footer form input {
-        width: 100%;
-      }
- 
-      ul {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        margin-bottom: 3em;
-      }
- 
-      ul li {
-        display: block;
-        padding: 0.5rem 1rem;
-        margin-bottom: 1rem;
-        background-color: #cecece;
-        border-radius: 0 30px 30px 0;
-        width: 70%;
-      }
-      ul li.own {
-        align-self: flex-end;
-        text-align: right;
-        background-color: #16a7f1;
-        color: #ffffff;
-        border-radius: 30px 0 0 30px;
-      }
+     
+    form {
+      display: flex;
+      justify-content: space-between;
+      background-color: #18242f;
+      padding: 1rem;
+      border-bottom: 1px solid white;
+    }
+    form input {
+      background-color: #18242f;
+      border: 1px solid cyan;
+      padding: 10px;
+      width: 100%;
+      border-radius: 20px;
+      color: white;
+    }
     `;
   }
 
  firstUpdated() {
-   this.unresolved = false;
-   this.data = this.shadowRoot.querySelector("#data");
-   this.logged = localStorage.getItem('logged') == 'true' ? true : false;
+    this.unresolved = false;
+    this.data = this.shadowRoot.querySelector("#data");
+    this.logged = localStorage.getItem('logged') == 'true' ? true : false;
+    if (this.logged) {
+      this.likes = localStorage.getItem('likes') != null ? JSON.parse(localStorage.getItem('likes')) : []
+      this.retweets = localStorage.getItem('retweets') != null ? JSON.parse(localStorage.getItem('retweets')) : []
+    }
  }
 
  handleLogin(e) {
     this.user = e.detail.user;
-   this.logged = localStorage.getItem('logged') == 'true' ? true : false;
+    this.logged = localStorage.getItem('logged') == 'true' ? true : false;
  }
+
+
+ userAdded(e) {
+  this.users = e.detail;
+}
 
  sendTweet(e) {
    e.preventDefault();
@@ -110,7 +92,10 @@ class TwitbookApp extends LitElement {
 
    this.database.collection('tweets').add({
      content: this.tweet,
-     user: this.user.uid,
+     user: {
+         id: this.user.uid,
+         name: this.user.displayName
+        },
      email: this.user.email,
      date: new Date().getTime()
    }).then(snapshot => {
@@ -118,143 +103,47 @@ class TwitbookApp extends LitElement {
    });
  }
 
+ tweetAdded(e) {
+  this.tweets = e.detail;
+  setTimeout(function () {
+       window.scrollTo(0, document.body.scrollHeight);
+  }, 0);
+}
+   
+like(tweet) {
+    firebase.firestore().collection('likes').add({
+         tweet_id: tweet.id,
+         user_id: firebase.auth().currentUser.uid
+    })
+    this.likes = [...this.likes, tweet.id]
+    localStorage.setItem('likes', JSON.stringify(this.likes))
+}
+
  render() {
    return html`
-   <main id="view">
-   <app-user name="user" ?active="${this.page == 'user'}"></app-user>
-</main>
-     <section>
-       <twitbook-store
+   <twitbook-store
        collection="tweets"
        @child-changed="${this.tweetAdded}"></twitbook-store>
        <slot name="header"></slot>
-       <main>
-         ${console.log(this.logged)}
-         ${console.log(this.page)}
-         ${ !this.logged ?
-           html`
-             <twitbook-auth></twitbook-auth>
-             <twitbook-login @user-logged="${this.handleLogin}"></twitbook-login>
-            `: html`
-             <h2>Hi, ${this.user.email}</h2>
-             <button @click="${this.getUserPage}">Mon Profil</button>
-             <button @click="${this.subscribe}">subscribe</button>
-             <ul>
-               ${this.tweets.map(tweet => html`
-                 <li
-                   class="${tweet.user == this.user.uid ? 'own': ''}">
-                   <strong>
-                   ${tweet.email} said : 
-                   </strong>
-                   <span>${tweet.content} - ${this.getDate(tweet.date)}</span>
-                 </li>
-               `)}
-             </ul>
-           </main>
-           <footer>
-             <form @submit="${this.sendtweet}">
+        <form @submit="${this.sendTweet}">
                <input
                  type="text"
                  placeholder="Send new tweet ..."
                  .value="${this.tweet}"
                  @input="${e => this.tweet = e.target.value}">
-               <button type="submit">Send</button>
-             </form>
-           </footer>
-           `
-         }
-     </section>
-   `;
- }
-//  <profileUser name="profileUser" ?active="${this.page == 'profileUser'}">Mon Profil</profileUser>
- tweetAdded(e) {
-   this.tweets = e.detail;
-   setTimeout(function () {
-        window.scrollTo(0, document.body.scrollHeight);
-   }, 0);
- }
+    </form>
+   <main id="view">
+   <app-user name="me" ?active="${this.page == 'me'}"></app-user>
+   <app-home 
+      name="home" .tweets="${this.tweets}" 
+      @like-event="${e => {this.like(e.detail); e.detail.likes_count += 1}}" 
+      .firebase="${firebase}" 
+      .moment="${moment}" 
+      .retweets="${this.retweets}"
+      .likes="${this.likes}"
+      ?active="${this.page == 'home'}"></app-home>
+</main>`;
+ }  
 
- userAdded(e) {
-   this.users = e.detail;
- }
-
- getDate(timestamp) {
-   const date = new Date(timestamp);
-   // Hours part from the timestamp
-   const hours = date.getHours();
-   // Minutes part from the timestamp
-   const minutes = "0" + date.getMinutes();
-   // Seconds part from the timestamp
-   const seconds = "0" + date.getSeconds();
-
-   // Will display time in 10:30:23 format
-   return `${hours}:${minutes.substr(-2)}:${seconds.substr(-2)}`;
- }
-
- sendSubscription() {
-  if (Notification.permission === 'granted') {
-    navigator.serviceWorker.ready
-      .then(registration => {
-        registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: this.urlBase64ToUint8Array(document.config.publicKey)
-        }).then(async subscribtion => {
-          subscribtion.id = this.user.uid;
-          await fetch('http://localhost:8085/subscribe', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(subscribtion)
-          })
-        });
-      });
-  }
-}
-
-  subscribe() {
-    if (('serviceWorker' in navigator) || ('PushManager' in window)) {
-      Notification.requestPermission()
-        .then((result) => {
-          if (result === 'denied') {
-            console.log('Permission wasn\'t granted. Allow a retry.');
-            return;
-          }
-          if (result === 'default') {
-            console.log('The permission request was dismissed.');
-            return;
-          }
-          console.log('Notification granted', result);
-          this.sendSubscription();
-          this.urlBase64ToUint8Array(document.config.publicKey);
-          // Do something with the granted permission.
-        });
-    }
-  }
-
-  getUserPage(){
-    document.location.href="http://127.0.0.1:8081/user";
-  }
-  
-  urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
- 
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
- 
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-
-    return outputArray;
-  }
-
-  profil() {  
-    this.urlBase64ToUint8Array(document.config.publicKey);
-  }
-  
 }
 customElements.define('twitbook-app', TwitbookApp);

@@ -10,16 +10,19 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "polymer-cli": "^1.9.8",
-    "workbox-cli": "^4.2.0"
+    "@fortawesome/fontawesome-free": "^5.9.0",
+    "polymer-cli": "^1.9.11",
+    "workbox-cli": "^4.3.1"
   },
   "dependencies": {
-    "@firebase/app": "^0.4.10",
-    "@firebase/firestore": "^1.4.4",
+    "@firebase/app": "^0.4.11",
+    "@firebase/firestore": "^1.4.5",
     "@syu93/lit-router": "^0.2.1",
-    "firebase": "^6.3.0",
-    "idb": "^4.0.3",
-    "lit-element": "^2.1.0",
+    "babel-core": "^6.26.3",
+    "firebase": "^6.3.1",
+    "idb": "^4.0.4",
+    "lit-element": "^2.2.0",
+    "moment": "^2.24.0",
     "workbox-webpack-plugin": "^4.3.1"
   }
 }

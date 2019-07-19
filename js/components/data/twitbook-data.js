@@ -24,10 +24,6 @@ class TwitbookData extends LitElement {
         firebase.initializeApp(document.config);
         this.database = firebase.database();
 
-        /*this.database.ref().child(this.path).push({
-            name: 'Lancelot'
-        });*/
-
         this.database.ref().child(this.path).on('value', data => this.nodeHasChanged('value', data))
         this.database.ref().child(this.path).on('child_added', data => this.nodeHasChanged('child_added', data))
         this.database.ref().child(this.path).on('child_changed', data => this.nodeHasChanged('child_changed', data))

@@ -3,19 +3,6 @@ import { LitElement, html, css } from 'lit-element';
 export default class AppTweet extends LitElement {
   constructor() {
     super();
-    this.title = "";
-    this.description = "";
-    this.src = "";
-    this.placeholder = "";
-  }
-
-  firstUpdated() {
-    this.shadowRoot.querySelector('img')
-      .addEventListener('load', () => {
-        this.shadowRoot
-          .querySelector('.placeholder')
-          .classList.add('fade');
-      });
   }
 
   static get styles() {
@@ -113,6 +100,7 @@ export default class AppTweet extends LitElement {
 
   static get properties() {
     return {
+      id: { type: Number },
       username: { type: String },
       date: { type: String },
       src: { type: String },
@@ -130,33 +118,6 @@ export default class AppTweet extends LitElement {
   swapImage() {
     this.shadowRoot.querySelector('img')
       .src = this.src;
-  }
-
-  render() {
-    return html`
-      <style>
-        .tweet .placeholder {
-          background-image: url("${this.placeholder}");
-        }
-
-        .displayed {
-            display: inline;
-        }
-
-        .hidden {
-          display: none;
-        }
-      </style>
-      <article class="tweet">
-        <header>
-          <p>${this.username} - ${this.date}</p>
-        </header>
-        <main>
-          <p>${this.description}</p>
-         <!-- <img class="${this.src != undefined ? "displayed" : "hidden"}" src="${this.src}" /> -->
-        </main>
-      </article>
-    `;
   }
 }
 

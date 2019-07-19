@@ -1,4 +1,4 @@
-import { LitElement, html } from "lit-element";
+import { LitElement, html } from '../../../node_modules/lit-element/lit-element.js'
 
 export default class AppUser extends LitElement {
     constructor() {
@@ -33,5 +33,7 @@ export default class AppUser extends LitElement {
         </div>
       `;
     }
+
+    
 }
 customElements.define('app-user', AppUser);
