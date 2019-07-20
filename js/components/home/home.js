@@ -67,12 +67,29 @@ export default class Home extends LitElement {
         margin-right: 20px;
         margin-top: 10px;
       }
+
+      form {
+        display: flex;
+        justify-content: space-between;
+        background-color: #18242f;
+        padding: 1rem;
+        border-bottom: 1px solid white;
+      }
+      form input {
+        background-color: #18242f;
+        border: 1px solid cyan;
+        padding: 10px;
+        width: 100%;
+        border-radius: 20px;
+        color: white;
+      }
     `;
   }
 
     constructor() {
       super();
       
+      this.tweetText = "";
       this.tweet = null;
       this.tweets = [];
       this.likes = [];
@@ -83,6 +100,11 @@ export default class Home extends LitElement {
 
     static get properties() {
       return {
+        unresolved: {
+          type: Boolean,
+          reflect: true
+        },
+        tweetText: String,
         tweet: Object,
         tweets: Array,
         hasLiked: Boolean,
@@ -94,6 +116,14 @@ export default class Home extends LitElement {
 
     render() {
         return html`
+        <form @submit="${this.sendTweet}">
+               <input
+                 type="text"
+                 placeholder="Send new tweet ..."
+                 .value="${this.tweetText}"
+                 @input="${e => this.tweetText = e.target.value}"
+                >
+    </form>
       <ul>
         ${this.tweets.map(tweet => html`
           <li
@@ -106,7 +136,7 @@ export default class Home extends LitElement {
 
             <div class="actions">
             <button class="comment">Commenter</button>
-             ${ this.hasLiked(tweet.id) ? 
+             ${ tweet.likes.find(item => item == this.firebase.auth().currentUser.uid ) ? 
              html`
              <span><button @click="${e => this.dislike(tweet)}"><img class="like" src="../images/heart.svg" /></button> ${tweet.likes_count}</span>
             `:
@@ -114,12 +144,12 @@ export default class Home extends LitElement {
              <span><button @click="${e => this.like(tweet)}"><img class="like" src="../images/heart_empty.svg" /> </button> ${tweet.likes_count != 0 ? tweet.likes_count : 0}</span>
             `
            }
-           ${ this.hasRetweeted(tweet.id) ? 
+           ${ tweet.likes.find(item => item == this.firebase.auth().currentUser.uid ) ? 
              html`
              <span><button @click="${e => this.unretweet(tweet)}"><img class="retweet" src="../images/unretweet.svg" /></button> ${tweet.retweets_count}</span>
             `:
             html`
-             <span><button @click="${e => this.retweet(tweet)}"><img class="retweet" src="../images/retweet.svg" /> </button> ${tweet.retweets_count != 0 ? tweet.likes_count : 0}</span>
+             <span><button @click="${e => this.retweet(tweet)}"><img class="retweet" src="../images/retweet.svg" /> </button> ${tweet.retweets_count != 0 ? tweet.retweets_count : 0}</span>
             `}
             </div>
           </li>
@@ -131,58 +161,51 @@ export default class Home extends LitElement {
     </footer>`;
     }
 
-
-
+    sendTweet(e) {
+      e.preventDefault();
+      this.dispatchEvent(new CustomEvent('tweet-sent', { detail: this.tweetText }))
+      this.tweetText = "";
+    }
    
     getDate(timestamp) {
       return this.moment(timestamp).fromNow()
     }
    
     like(tweet) {
+      this.tweet = null;
       this.tweet = tweet
+      this.tweet.likes_count += 1
+      this.tweet.likes.push(this.firebase.auth().currentUser.uid)
       this.dispatchEvent(new CustomEvent('like-event', { detail: tweet }))
     }
    
     dislike(tweet) {
-     console.log("enter dislike")
-     this.firebase.firestore().collection('likes').where('tweet_id', '==', tweet.id).where('user_id', '==', this.firebase.auth().currentUser.uid).get().then(snapshot => {
-       snapshot.forEach(function(doc) {
-         doc.ref.delete();
-       });
-     })
-     this.likes = this.likes.filter(item => item != tweet.id)
-     tweet.likes_count -= 1
-     localStorage.setItem('likes', JSON.stringify(this.likes))
+      this.tweet = null;
+      this.tweet = tweet
+      this.tweet.likes_count -= 1
+      this.dispatchEvent(new CustomEvent('dislike-event', { detail: tweet }))
    }
    
    retweet(tweet) {
-     console.log("enter retweet")
-     this.firebase.firestore().collection('retweets').add({
-        tweet_id: tweet.id,
-        user_id: this.firebase.auth().currentUser.uid
-     })
-     this.retweets = [...this.retweets, tweet.id]
-     tweet.retweets_count += 1
-     localStorage.setItem('retweets', JSON.stringify(this.retweets))
+    this.tweet = null;
+    this.tweet = tweet
+    this.tweet.retweets_count += 1
+    this.dispatchEvent(new CustomEvent('retweet-event', { detail: tweet }))
    }
    
    unretweet(tweet) {
-    console.log("enter unretweet")
-    this.firebase.firestore().collection('retweets').where('tweet_id', '==', tweet.id).where('user_id', '==', this.firebase.auth().currentUser.uid).get().then(snapshot => {
-      snapshot.forEach(function(doc) {
-        doc.ref.delete();
-      });
-    })
-    this.retweets = this.retweets.filter(item => item != tweet.id)
-    tweet.retweets_count -= 1
-    localStorage.setItem('retweets', JSON.stringify(this.retweets))
+    this.tweet = null;
+    this.tweet = tweet
+    this.tweet.retweets_count -= 1
+    this.dispatchEvent(new CustomEvent('unretweet-event', { detail: tweet }))
    }
    
-    hasLiked(id) {
-       return this.likes.find(function(item){ return item == id })
+    hasLiked(tweet) {
+       return this.tweet.likes.find()
    }
    
      hasRetweeted(id) {
+      this.retweets = localStorage.getItem('retweets') != null ? JSON.parse(localStorage.getItem('retweets')) : []
        return this.retweets.find(function (item) { return item == id })
      }
    

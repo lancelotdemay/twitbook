@@ -6,7 +6,7 @@ import './js/components/twitbook-app.js';
 const router = new LitRouter([
   {
     name: 'home',
-    path: '/home',
+    path: '/',
     component: () => import("./js/components/home/home.js")
   },
   {

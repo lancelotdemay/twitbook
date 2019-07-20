@@ -35,6 +35,9 @@ class TwitbookData extends LitElement {
         switch(event) {
             case 'child_added':
                 this.data = [...this.data, data];
+                this.data = this.data.sort(function(a,b){
+                    return b.date - a.date
+                    });
                 this._data = this.data.map(item => item.val());
                 this.dispatchEvent(new CustomEvent('child-changed', { detail: this._data }))
                 break;

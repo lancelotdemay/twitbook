@@ -47,22 +47,7 @@ class TwitbookApp extends LitElement {
 
  static get styles() {
     return css`
-     
-    form {
-      display: flex;
-      justify-content: space-between;
-      background-color: #18242f;
-      padding: 1rem;
-      border-bottom: 1px solid white;
-    }
-    form input {
-      background-color: #18242f;
-      border: 1px solid cyan;
-      padding: 10px;
-      width: 100%;
-      border-radius: 20px;
-      color: white;
-    }
+    
     `;
   }
 
@@ -87,16 +72,19 @@ class TwitbookApp extends LitElement {
 }
 
  sendTweet(e) {
-   e.preventDefault();
    this.database = firebase.firestore();
 
    this.database.collection('tweets').add({
-     content: this.tweet,
+     content: e.detail,
      user: {
          id: this.user.uid,
          name: this.user.displayName
-        },
+      },
      email: this.user.email,
+     likes_count: 0,
+     retweets_count: 0,
+     likes: [],
+     retweets: [],
      date: new Date().getTime()
    }).then(snapshot => {
      this.tweet = '';
@@ -105,19 +93,44 @@ class TwitbookApp extends LitElement {
 
  tweetAdded(e) {
   this.tweets = e.detail;
-  setTimeout(function () {
-       window.scrollTo(0, document.body.scrollHeight);
-  }, 0);
+  this.tweets.sort(function(a,b){
+      return b.date - a.date
+    });
 }
    
 like(tweet) {
-    firebase.firestore().collection('likes').add({
-         tweet_id: tweet.id,
-         user_id: firebase.auth().currentUser.uid
+    firebase.firestore().collection("tweets").doc(tweet.id).update({
+      "likes": firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid),
+      "likes_count": tweet.likes_count
     })
-    this.likes = [...this.likes, tweet.id]
-    localStorage.setItem('likes', JSON.stringify(this.likes))
 }
+
+dislike(tweet) {
+  firebase.firestore().collection("tweets").doc(tweet.id).update({
+    "likes": firebase.firestore.FieldValue.arrayRemove(firebase.auth().currentUser.uid),
+    "likes_count": tweet.likes_count
+  })
+}
+
+retweet(tweet) {
+  firebase.firestore().collection('retweets').add({
+    tweet_id: tweet.id,
+    user_id: firebase.auth().currentUser.uid
+ })
+ this.retweets = [...this.retweets, tweet.id]
+ localStorage.setItem('retweets', JSON.stringify(this.retweets))
+}
+
+unretweet(tweet) {
+  firebase.firestore().collection('retweets').where('tweet_id', '==', tweet.id).where('user_id', '==', firebase.auth().currentUser.uid).get().then(snapshot => {
+    snapshot.forEach(function(doc) {
+      doc.ref.delete();
+    });
+  })
+  this.retweets = this.retweets.filter(item => item != tweet.id)
+  localStorage.setItem('retweets', JSON.stringify(this.retweets))
+}
+
 
  render() {
    return html`
@@ -125,23 +138,24 @@ like(tweet) {
        collection="tweets"
        @child-changed="${this.tweetAdded}"></twitbook-store>
        <slot name="header"></slot>
-        <form @submit="${this.sendTweet}">
-               <input
-                 type="text"
-                 placeholder="Send new tweet ..."
-                 .value="${this.tweet}"
-                 @input="${e => this.tweet = e.target.value}">
-    </form>
-   <main id="view">
-   <app-user name="me" ?active="${this.page == 'me'}"></app-user>
-   <app-home 
+    <main id="view">
+     ${ this.logged ? html`
+      <app-user name="me" ?active="${this.page == 'me'}"></app-user>
+      <app-home 
       name="home" .tweets="${this.tweets}" 
-      @like-event="${e => {this.like(e.detail); e.detail.likes_count += 1}}" 
+      @like-event="${e => {this.like(e.detail);}}" 
+      @dislike-event="${e => {this.dislike(e.detail);}}"
+      @retweet-event="${e => {this.retweet(e.detail);}}" 
+      @unretweet-event="${e => {this.unretweet(e.detail);}}"
+      @tweet-sent="${e => {this.sendTweet(e);}}"
       .firebase="${firebase}" 
       .moment="${moment}" 
       .retweets="${this.retweets}"
       .likes="${this.likes}"
-      ?active="${this.page == 'home'}"></app-home>
+      ?active="${this.page == ''}"></app-home>`: html`
+      <twitbook-auth></twitbook-auth>
+      <twitbook-login @user-logged="${this.handleLogin}" unresolved></twitbook-login>
+      `}
 </main>`;
  }  
 

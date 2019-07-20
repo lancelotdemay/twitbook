@@ -18,6 +18,15 @@
             background-color: #18242f;
         }
 
+        form {
+            background-color: #18242f;
+       padding: 20px;
+      } 
+
+      form input {
+          width:100%;
+      }
+
         twitbook-app {
             display: block;
             background-color: #ffffff;
@@ -50,11 +59,16 @@
     </script>
 </head>
 <body>
-    <script src="./config.js"></script>
+    <script src="./config.js" defer></script>
     <twitbook-app unresolved>
         <header slot="header">Twitbook</header>
+        <form>
+                <input
+                  type="text"
+                  placeholder="Send new tweet ...">
+     </form>
     </twitbook-app>
-    <script type="module" src="./router.js"></script>
-    <script type="module" src="./js/components/twitbook-app.js"></script>
+    <script type="module" src="./router.js" defer></script>
+    <script type="module" src="./js/components/twitbook-app.js" defer></script>
 </body>
 </html>

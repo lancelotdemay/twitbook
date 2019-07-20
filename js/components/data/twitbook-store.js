@@ -28,16 +28,8 @@ export class TwitbookStore extends LitElement {
                     const dataAdded = doc.data()
                     dataAdded.id = doc.id
 
-                    firebase.firestore().collection('likes').where('tweet_id', '==', doc.id).get().then(snap => {
-                        dataAdded.likes_count = snap.size
-                     }).then(data => {
-                        
-                        firebase.firestore().collection('retweets').where('tweet_id', '==', doc.id).get().then(snap => {
-                            dataAdded.retweets_count = snap.size
-                            this.data = [ ...this.data, dataAdded ];
-                            this.dispatchEvent(new CustomEvent('child-changed', { detail: this.data }));
-                        })
-                     });
+                    this.data = [ ...this.data, dataAdded ];
+                    this.dispatchEvent(new CustomEvent('child-changed', { detail: this.data }));
 
                 } else if (type == 'removed') {
                     this.data.splice(oldIndex, 1);
