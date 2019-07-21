@@ -116,6 +116,11 @@ export default class Home extends LitElement {
 
     render() {
         return html`
+        <form action="/me">
+               <input
+                 type="submit"
+                 value="My Profile"
+                ></form>
         <form @submit="${this.sendTweet}">
                <input
                  type="text"

@@ -140,7 +140,11 @@ unretweet(tweet) {
        <slot name="header"></slot>
     <main id="view">
      ${ this.logged ? html`
-      <app-user name="me" ?active="${this.page == 'me'}"></app-user>
+      <app-user name="me" 
+      .moment="${moment}" 
+      .tweets="${this.tweets}" 
+      .firebase="${ firebase.auth().currentUser}" 
+      ?active="${this.page == 'me'}"></app-user>
       <app-home 
       name="home" .tweets="${this.tweets}" 
       @like-event="${e => {this.like(e.detail);}}" 
