@@ -26,6 +26,7 @@ export class TwitbookAuth extends LitElement {
             email: String,
             username: String,
             password: String,
+            avatar: Object
         }
     }
 
@@ -36,27 +37,37 @@ export class TwitbookAuth extends LitElement {
 
     handlePost(e){
         e.preventDefault();
+        
+        this.image = this.shadowRoot.getElementById('avatar').files[0];
+        let base64image = this.getBase64Image(this.image)
+       
         if(!this.email | !this.password) return console.error('Email or password are empty or wrong');
         this.auth.createUserWithEmailAndPassword(this.email, this.password).then(response => {
             let user = response.user
 
             firebase.firestore().collection('users').add({
                 'user_id': user.uid,
+                'avatar': base64image,
                 'follows': [],
                 'follows_count': 0,
                 'followers': [],
                 'followers_count': 0
-            }).then(response => {
-                console.log(response)
             })
            
             user.updateProfile({
                 displayName: this.username
             })
-
-            console.log(user)
         })
        
+    }
+
+    getBase64Image(img) {
+        var canvas = this.shadowRoot.getElementById('canvas');
+        canvas.width = 80;
+        canvas.height = 80;
+        var ctx = canvas.getContext("2d");
+        var dataURL = canvas.toDataURL("image/jpeg");
+        return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
     }
 
     render() {
@@ -66,6 +77,11 @@ export class TwitbookAuth extends LitElement {
                 <div class="input-group">
                     <label for="email" class="label-form">Email: </label>
                     <input id="email" type="email" @input="${e => this.email = e.target.value}">
+                </div>
+                <div class="input-group">
+                    <label for="avatar" class="label-form">Avatar: </label>
+                    <input id="avatar" type="file">
+                    <canvas id="canvas" height="80" width="80"></canvas>
                 </div>
                 <input id="username" type="text" @input="${e => this.username = e.target.value}">
                 <input type="password" @input="${e => this.password = e.target.value}">

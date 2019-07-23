@@ -45,6 +45,14 @@ export class TwitbookLogin extends LitElement {
         if(!this.email | !this.password) return console.error('Email or password are empty or wrong');
         this.auth.signInWithEmailAndPassword(this.email, this.password)
         .then(user => {
+            console.log(user)
+            firebase.firestore().collection('users').where('user_id','==',user.user.uid).get().then(snapshot => {
+                snapshot.docs.forEach(doc => {
+                    console.log(doc.data())
+                    localStorage.setItem('avatar', doc.data().avatar)
+                })
+            })
+
             localStorage.setItem('logged', true);
             localStorage.setItem('user', JSON.stringify(user))
         })

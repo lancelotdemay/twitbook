@@ -91,6 +91,8 @@ export default class Home extends LitElement {
       this.tweet = null;
       this.tweets = [];
       this.likes = [];
+      this.user = null;
+      this.avatar = "";
       this.retweets = [];
       this.firebase = null;
       this.moment = null;
@@ -105,6 +107,8 @@ export default class Home extends LitElement {
         tweetText: String,
         tweet: Object,
         tweets: Array,
+        user: Object,
+        avatar: String,
         hasLiked: Boolean,
         hasRetweeted: Boolean,
         firebase: Object,
@@ -112,24 +116,29 @@ export default class Home extends LitElement {
       }
     }
 
-    firstUpdated(changedProperties){
-  
+    firstUpdated(){
+        this.avatar = localStorage.getItem('avatar');
+        console.log(this.avatar)
     }
 
     render() {
         return html`
+        <div>
+          ${console.log(this.user)}
+          <img src="data:image/png;base64,${this.avatar}" alt="user avatar"/>
         <form action="/me">
                <input
                  type="submit"
-                 value="My Profile"
+                 value="Mon profil"
                 ></form>
+                </div>
         <form @submit="${this.sendTweet}">
                <input
-                 type="text"
-                 placeholder="Send new tweet ..."
-                 .value="${this.tweetText}"
-                 @input="${e => this.tweetText = e.target.value}"
-                >
+                  aria-label="Tweet send input"
+                  type="text"
+                  placeholder="Send new tweet ..."
+                  .value="${this.tweetText}"
+                  @input="${e => this.tweetText = e.target.value}">
     </form>
       <ul>
         ${this.tweets.map(tweet => html`
@@ -144,18 +153,18 @@ export default class Home extends LitElement {
             <button class="comment" @click="${e => this.comment(tweet)}">Commenter</button>
              ${ tweet.likes.find(item => item == this.firebase.auth().currentUser.uid ) ? 
              html`
-             <span><button @click="${e => this.dislike(tweet)}"><img class="like" src="../images/heart.svg" /></button> ${tweet.likes_count}</span>
+             <span><button aria-label="dislike button" @click="${e => this.dislike(tweet)}"><img alt="heart image" class="like" src="../images/heart.svg" /></button> ${tweet.likes_count}</span>
             `:
             html`
-             <span><button @click="${e => this.like(tweet)}"><img class="like" src="../images/heart_empty.svg" /> </button> ${tweet.likes_count != 0 ? tweet.likes_count : 0}</span>
+             <span><button aria-label="like button" @click="${e => this.like(tweet)}"><img alt="heart empty image" class="like" src="../images/heart_empty.svg" /> </button> ${tweet.likes_count != 0 ? tweet.likes_count : 0}</span>
             `
            }
            ${ tweet.retweets.find(item => item == this.firebase.auth().currentUser.uid ) ? 
              html`
-             <span><button @click="${e => this.unretweet(tweet)}"><img class="retweet" src="../images/unretweet.svg" /></button> ${tweet.retweets_count}</span>
+             <span><button aria-label="retweet button" @click="${e => this.unretweet(tweet)}"><img alt="retweet image" class="retweet" src="../images/unretweet.svg" /></button> ${tweet.retweets_count}</span>
             `:
             html`
-             <span><button @click="${e => this.retweet(tweet)}"><img class="retweet" src="../images/retweet.svg" /> </button> ${tweet.retweets_count != 0 ? tweet.retweets_count : 0}</span>
+             <span><button aria-label="unretweet button" @click="${e => this.retweet(tweet)}"><img alt="retweet empty image" class="retweet" src="../images/retweet.svg" /> </button> ${tweet.retweets_count != 0 ? tweet.retweets_count : 0}</span>
             `}
             </div>
           </li>

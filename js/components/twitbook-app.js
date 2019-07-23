@@ -63,10 +63,13 @@ class TwitbookApp extends LitElement {
 
   header button {
     color: white;
-  }
-
-  button {
-  
+    border: 1px solid cyan;
+    border-radius: 20px;
+    max-height: 30px;
+    margin-right: 5px;
+    display: flex;
+    align-self: center;
+    background-color: #1B2938;
   }
     `;
   }
@@ -76,14 +79,14 @@ class TwitbookApp extends LitElement {
     this.data = this.shadowRoot.querySelector("#data");
     this.logged = localStorage.getItem('logged') == 'true' ? true : false;
     if (this.logged) {
-      this.likes = localStorage.getItem('likes') != null ? JSON.parse(localStorage.getItem('likes')) : []
-      this.retweets = localStorage.getItem('retweets') != null ? JSON.parse(localStorage.getItem('retweets')) : []
+      this.user = JSON.parse(localStorage.getItem('user'))
+      console.log(user)
     }
+
  }
 
  handleLogin(e) {
     this.user = e.detail.user;
-    console.log(this.user)
     this.logged = localStorage.getItem('logged') == 'true' ? true : false;
  }
 
@@ -101,7 +104,6 @@ class TwitbookApp extends LitElement {
 
  sendTweet(e) {
    this.database = firebase.firestore();
-  
    this.database.collection('tweets').add({
      content: e.detail,
      user: {
@@ -158,20 +160,24 @@ comment() {
   window.location.href = "/comment"
 }
 
+setPageHome() {
+  window.location.href = "/"
+}
+
 
  render() {
    return html`
    <twitbook-store
        collection="tweets"
        @child-changed="${this.tweetAdded}"></twitbook-store>
-       <header slot="header"><span style="${this.logged ? 'margin-left: 84px;': ''}">Twitbook </span> ${ this.logged ? html`<button class="logout" @click="${e => this.logout()}">Déconnexion</button>`: html``}</header>
+       <header slot="header"><span @click="${e => this.setPageHome()}" style="${this.logged ? 'margin-left: 84px;': ''}">Twitbook</span> ${ this.logged ? html`<button class="logout" @click="${e => this.logout()}">Déconnexion</button>`: html``}</header>
     <main id="view">
      ${ this.logged ? html`
       <app-user name="me" 
       .user="${this.user}"
       .moment="${moment}" 
       .tweets="${this.tweets}" 
-      .firebase="${ firebase.auth().currentUser}" 
+      .firebase="${firebase}" 
       ?active="${this.page == 'me'}"></app-user>
       <app-comment 
       .firebase="${firebase}"  
@@ -189,6 +195,7 @@ comment() {
       @comment-event="${e => {this.comment()}}"
       .firebase="${firebase}" 
       .moment="${moment}" 
+      .user="${this.user}"
       .retweets="${this.retweets}"
       .likes="${this.likes}"
       ?active="${this.page == ''}"></app-home>`: html`

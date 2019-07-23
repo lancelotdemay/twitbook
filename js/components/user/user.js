@@ -4,6 +4,10 @@ export default class AppUser extends LitElement {
     constructor() {
       super();
       this.user = null
+      this.followers = [];
+      this.followers_count = 0;
+      this.follows = [];
+      this.follows_count = 0;
       this.firebase = null;
       this.tweets = [];
       this.moment = null;
@@ -14,18 +18,33 @@ export default class AppUser extends LitElement {
           user: Object,
           firebase: Object,
           tweets: Array,
-          moment: Object
+          moment: Object,
+          followers: Array,
+          followers_count: Number,
+          follows: Array,
+          follows_count: Number,
         };
+    }
+
+    firstUpdated() {
+        this.firebase.firestore().collection('users').where('user_id', '==', this.firebase.auth().currentUser.uid).get().then(snapshot => {
+          snapshot.docs.forEach(doc => {
+            this.followers = doc.data().followers
+            this.followers_count = doc.data().followers_count
+            this.follows = doc.data().follows
+            this.follows_count = doc.data().follows_count
+          })
+        })
     }
 
     render() {
       return html`
         <div class="">
           <div>
-            ${this.firebase.displayName}
+            ${this.firebase.auth().currentUser.displayName}
           </div>
           <div>
-          <p>${this.user.followers_count} Abonnements </p> <p> ${this.user.follows_count} Abonnés </p>
+          <p>${this.followers_count > 0 ? this.followers_count : '0'} Abonnements </p> <p> ${this.follows_count > 0 ? this.follows_count : '0'} Abonnés </p>
           </div>
           ${this.tweets.map(tweet =>  html` 
           ${tweet.user.id == this.firebase.uid ? html`
@@ -38,22 +57,6 @@ export default class AppUser extends LitElement {
             <span class="tweet-content">${tweet.content}</span>
 
             <div class="actions">
-            <button class="comment">Commenter</button>
-             ${ tweet.likes.find(item => item == this.firebase.uid ) ? 
-             html`
-             <span><button @click="${e => this.dislike(tweet)}"><img class="like" src="../images/heart.svg" /></button> ${tweet.likes_count}</span>
-            `:
-            html`
-             <span><button @click="${e => this.like(tweet)}"><img class="like" src="../images/heart_empty.svg" /> </button> ${tweet.likes_count != 0 ? tweet.likes_count : 0}</span>
-            `
-           }
-           ${ tweet.likes.find(item => item == this.firebase.uid ) ? 
-             html`
-             <span><button @click="${e => this.unretweet(tweet)}"><img class="retweet" src="../images/unretweet.svg" /></button> ${tweet.retweets_count}</span>
-            `:
-            html`
-             <span><button @click="${e => this.retweet(tweet)}"><img class="retweet" src="../images/retweet.svg" /> </button> ${tweet.retweets_count != 0 ? tweet.retweets_count : 0}</span>
-            `} : 
             </div>
           </li>
            ` : ''}

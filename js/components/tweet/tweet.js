@@ -68,18 +68,18 @@ export default class AppTweet extends LitElement {
             <button class="comment" @click="${e => this.comment(this.tweet)}">Commenter</button>
              ${ this.tweet.likes.find(item => item == this.firebase.auth().currentUser.uid ) ? 
              html`
-             <span><button @click="${e => this.dislike(this.tweet)}"><img class="like" src="../images/heart.svg" /></button> ${this.tweet.likes_count}</span>
+             <span><button  aria-label="dislike button" @click="${e => this.dislike(this.tweet)}"><img alt="heart image" class="like" src="../images/heart.svg" /></button> ${this.tweet.likes_count}</span>
             `:
             html`
-             <span><button @click="${e => this.like(this.tweet)}"><img class="like" src="../images/heart_empty.svg" /> </button> ${this.tweet.likes_count != 0 ? this.tweet.likes_count : 0}</span>
+             <span><button  aria-label="like button" @click="${e => this.like(this.tweet)}"><img alt="heart empty image" class="like" src="../images/heart_empty.svg" /> </button> ${this.tweet.likes_count != 0 ? this.tweet.likes_count : 0}</span>
             `
            }
            ${ this.tweet.retweets.find(item => item == this.firebase.auth().currentUser.uid ) ? 
              html`
-             <span><button @click="${e => this.unretweet(this.tweet)}"><img class="retweet" src="../images/unretweet.svg" /></button> ${this.tweet.retweets_count}</span>
+             <span><button  aria-label="unretweet button" @click="${e => this.unretweet(this.tweet)}"><img alt="unretweet image" class="retweet" src="../images/unretweet.svg" /></button> ${this.tweet.retweets_count}</span>
             `:
             html`
-             <span><button @click="${e => this.retweet(this.tweet)}"><img class="retweet" src="../images/retweet.svg" /> </button> ${this.tweet.retweets_count != 0 ? this.tweet.retweets_count : 0}</span>
+             <span><button  aria-label="retweet button" @click="${e => this.retweet(this.tweet)}"><img alt="retweet image" class="retweet" src="../images/retweet.svg" /> </button> ${this.tweet.retweets_count != 0 ? this.tweet.retweets_count : 0}</span>
             `}
             </div>
            </div>`
