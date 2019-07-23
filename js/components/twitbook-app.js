@@ -173,12 +173,12 @@ setPageHome() {
        <header slot="header"><span @click="${e => this.setPageHome()}" style="${this.logged ? 'margin-left: 84px;': ''}">Twitbook</span> ${ this.logged ? html`<button class="logout" @click="${e => this.logout()}">Déconnexion</button>`: html``}</header>
     <main id="view">
      ${ this.logged ? html`
-      <app-user name="me" 
+      <app-user name="user" 
       .user="${this.user}"
       .moment="${moment}" 
       .tweets="${this.tweets}" 
       .firebase="${firebase}" 
-      ?active="${this.page == 'me'}"></app-user>
+      ?active="${this.page == 'user'}"></app-user>
       <app-comment 
       .firebase="${firebase}"  
       .user="${this.user}"

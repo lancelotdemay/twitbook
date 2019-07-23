@@ -10,8 +10,8 @@ const router = new LitRouter([
     component: () => import("./js/components/home/home.js")
   },
   {
-    name: "me",
-    path: "/me",
+    name: "user",
+    path: "/user",
     component: () => import("./js/components/user/user.js")
   },
   {

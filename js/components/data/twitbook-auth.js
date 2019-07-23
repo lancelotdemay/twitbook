@@ -47,6 +47,8 @@ export class TwitbookAuth extends LitElement {
 
             firebase.firestore().collection('users').add({
                 'user_id': user.uid,
+                'name': user.displayName,
+                'email': user.email,
                 'avatar': base64image,
                 'follows': [],
                 'follows_count': 0,
