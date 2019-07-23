@@ -80,7 +80,6 @@ class TwitbookApp extends LitElement {
     this.logged = localStorage.getItem('logged') == 'true' ? true : false;
     if (this.logged) {
       this.user = JSON.parse(localStorage.getItem('user'))
-      console.log(user)
     }
 
  }
@@ -106,10 +105,13 @@ class TwitbookApp extends LitElement {
    this.database = firebase.firestore();
    this.database.collection('tweets').add({
      content: e.detail,
+     comments: [],
+     parent_id: 0,
      user: {
-         id: this.user.uid,
-         name: this.user.displayName,
+          id: this.user.uid,
+          name: this.user.displayName,
           email: this.user.email,
+          avatar: localStorage.getItem('avatar'),
       },
      likes_count: 0,
      retweets_count: 0,

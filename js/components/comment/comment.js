@@ -22,7 +22,10 @@ export default class AppComment extends LitElement {
         this.tweet.comments.forEach(comment => {
           this.firebase.firestore().collection("tweets").doc(comment).get().then(doc => {
               this.comments.push(doc.data())
-              this.requestUpdate()
+              this.comments.sort(function(a,b){
+                return b.date - a.date
+                });
+                this.requestUpdate()
           });
         });
       }
@@ -76,9 +79,14 @@ export default class AppComment extends LitElement {
 
         .comment-item {
           border: 1px solid white;
+          margin-bottom: 10px;
           padding: 10px;
         }
       `;
+    }
+
+    rerender() {
+      this.requestUpdate()
     }
 
     render() {
@@ -90,6 +98,7 @@ export default class AppComment extends LitElement {
             @unretweet-event="${e => {this.unretweet(e.detail);}}"
             @tweet-sent="${e => {this.sendTweet(e);}}"
             @comment-event="${e => {this.comment()}}"
+            .disableComment="true"
             .tweet="${this.tweet}" 
             .firebase="${this.firebase}" 
             .moment="${this.moment}"></app-tweet>
@@ -155,12 +164,16 @@ export default class AppComment extends LitElement {
       e.preventDefault()
       let id = this.tweet.id
       let comments = this.tweet.comments
+      let ctx = this
+      let commentT = this.commentText
       this.firebase.firestore().collection('tweets').add({
         content: this.commentText,
+        parent_id: id,
         user: {
             id: this.firebase.auth().currentUser.uid,
             name: this.firebase.auth().currentUser.displayName,
             email: this.firebase.auth().currentUser.email,
+            avatar: localStorage.getItem('avatar')
          },
         likes_count: 0,
         retweets_count: 0,
@@ -168,12 +181,11 @@ export default class AppComment extends LitElement {
         retweets: [],
         date: new Date().getTime()
       }).then(snapshot => {
-        console.log(snapshot)
-        this.tweet = '';
-        this.requestUpdate()
-        console.log(comments)
         this.firebase.firestore().collection('tweets').doc(id).update({
-            'comments': comments.push(snapshot.id)
+            'comments': this.firebase.firestore.FieldValue.arrayUnion(snapshot.id)
+        }).then(function () {
+            commentT = '';
+            ctx.rerender()
         })
       });
   }

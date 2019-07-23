@@ -26,7 +26,7 @@ export class TwitbookAuth extends LitElement {
             email: String,
             username: String,
             password: String,
-            avatar: Object
+            avatar: File
         }
     }
 
@@ -37,12 +37,15 @@ export class TwitbookAuth extends LitElement {
 
     handlePost(e){
         e.preventDefault();
+        let base64image = null;
         
         this.image = this.shadowRoot.getElementById('avatar').files[0];
-        let base64image = this.getBase64Image(this.image)
-       
+        this.getBase64Image().then(res => {
+            base64image = res
+
+            
         if(!this.email | !this.password) return console.error('Email or password are empty or wrong');
-        this.auth.createUserWithEmailAndPassword(this.email, this.password).then(response => {
+            this.auth.createUserWithEmailAndPassword(this.email, this.password).then(response => {
             let user = response.user
 
             firebase.firestore().collection('users').add({
@@ -56,20 +59,24 @@ export class TwitbookAuth extends LitElement {
                 'followers_count': 0
             })
            
-            user.updateProfile({
-                displayName: this.username
+                user.updateProfile({
+                    displayName: this.username
+                })
             })
-        })
-       
+        })   
     }
 
-    getBase64Image(img) {
-        var canvas = this.shadowRoot.getElementById('canvas');
-        canvas.width = 80;
-        canvas.height = 80;
-        var ctx = canvas.getContext("2d");
-        var dataURL = canvas.toDataURL("image/jpeg");
-        return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
+    getBase64Image() {
+        return new Promise((resolve, reject) => {
+        let reader= new FileReader();
+        reader.readAsDataURL(this.image);
+        reader.onload = function () {
+            resolve(reader.result);
+          };
+          reader.onerror = function (error) {
+            reject(console.log('Error: ', error));
+          };
+        });
     }
 
     render() {

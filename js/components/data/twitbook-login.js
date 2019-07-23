@@ -48,13 +48,14 @@ export class TwitbookLogin extends LitElement {
             console.log(user)
             firebase.firestore().collection('users').where('user_id','==',user.user.uid).get().then(snapshot => {
                 snapshot.docs.forEach(doc => {
-                    console.log(doc.data())
                     localStorage.setItem('avatar', doc.data().avatar)
+                    localStorage.setItem('user_info', doc.data())
                 })
             })
 
             localStorage.setItem('logged', true);
             localStorage.setItem('user', JSON.stringify(user))
+            window.location.href= "/"
         })
     }
 

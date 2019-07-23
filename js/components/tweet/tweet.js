@@ -3,6 +3,8 @@ import { LitElement, html, css } from 'lit-element';
 export default class AppTweet extends LitElement {
   constructor() {
     super();
+
+    this.disableComment = false;
   }
 
   static get properties() {
@@ -10,6 +12,7 @@ export default class AppTweet extends LitElement {
       tweet: Object,
       firebase: Object,
       moment: Object,
+      disableComment: String,
     };
   }
 
@@ -65,7 +68,8 @@ export default class AppTweet extends LitElement {
             <span class="tweet-content">${this.tweet.content}</span>
 
             <div class="actions">
-            <button class="comment" @click="${e => this.comment(this.tweet)}">Commenter</button>
+              ${ this.disableComment == "true" ? html `<button class="comment" @click="${e => this.comment(this.tweet)}">Commenter</button>`: html``}
+            
              ${ this.tweet.likes.find(item => item == this.firebase.auth().currentUser.uid ) ? 
              html`
              <span><button  aria-label="dislike button" @click="${e => this.dislike(this.tweet)}"><img alt="heart image" class="like" src="../images/heart.svg" /></button> ${this.tweet.likes_count}</span>

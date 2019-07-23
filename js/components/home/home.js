@@ -63,7 +63,6 @@ export default class Home extends LitElement {
 
       .tweet-content {
         margin-right: 20px;
-        margin-top: 10px;
       }
 
       form {
@@ -80,6 +79,46 @@ export default class Home extends LitElement {
         width: 100%;
         border-radius: 20px;
         color: white;
+      }
+
+      .profile {
+        display: flex;
+        align-items: center;
+        background-color: #18242f;
+        padding: 10px;
+        border-bottom: 1px solid white;
+      }
+
+      .profile img, .avatar {
+          height: 50px !important;
+          border: 1px solid cyan;
+          border-radius: 45px;
+          overflow: hidden;
+          background-color: #18242f;
+      }
+
+      .profile button {
+        background-color: #18242f;
+        border: 1px solid cyan;
+        padding: 10px;
+        flex-grow: 1;
+        border-radius: 20px;
+        margin-left: 10px;
+        margin-right: 5px;
+        color: white;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+      }
+
+      .user-name {
+        margin-left: 10px;
+      }
+
+      .tweet-info {
+        margin-left: 60px;
       }
     `;
   }
@@ -118,20 +157,18 @@ export default class Home extends LitElement {
 
   firstUpdated() {
     this.avatar = localStorage.getItem('avatar');
+    this.user = JSON.parse(localStorage.getItem('user'));
     console.log(this.avatar)
   }
 
   render() {
     return html`
-        <div>
-          ${console.log(this.user)}
-          <img src="data:image/png;base64,${this.avatar}" alt="user avatar"/>
-        <form action="/user">
-               <input
-                 type="submit"
-                 value="Mon profil"
-                ></form>
-                </div>
+         <div class="profile">
+              <img src="${this.avatar}" alt="user avatar"/>
+               <button aria-label="go to my profile" @click="${e => this.goToMyProfile()}" >
+               Mon profil
+              </button>
+        </div>
         <form @submit="${this.sendTweet}">
                <input
                   aria-label="Tweet send input"
@@ -143,10 +180,16 @@ export default class Home extends LitElement {
       <ul>
         ${this.tweets.map(tweet => html`
           <li class="tweet">
+            <div class="user-info">
+              <img class="avatar" alt="user avatar" src="${tweet.user.avatar}"/>
             <strong>
+              <span class="user-name">
             <a @click="${ e => this.getUserProfile(tweet.user.id)}">${tweet.user.name}</a> - ${this.getDate(tweet.date)}
+            </span>
             </strong>
+            </div>
             <br>
+            <div class="tweet-info">
             <span class="tweet-content">${tweet.content}</span>
 
             <div class="actions">
@@ -227,79 +270,76 @@ export default class Home extends LitElement {
   comment(tweet) {
     localStorage.setItem('tweet', JSON.stringify(tweet));
 
-    this.dispatchEvent(new CustomEvent('comment-event'))
-  }
+      this.dispatchEvent(new CustomEvent('comment-event'))
+   }
+   
+   goToMyProfile() {
+      window.location.href = "/me"
+   }
 
-  sendSubscription() {
-    if (Notification.permission === 'granted') {
-      navigator.serviceWorker.ready
-        .then(registration => {
-          registration.pushManager.subscribe({
-            userVisibleOnly: true,
-            applicationServerKey: this.urlBase64ToUint8Array(document.config.publicKey)
-          }).then(async subscribtion => {
-            subscribtion.id = this.user.uid;
-            await fetch('http://localhost:8085/subscribe', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(subscribtion)
-            })
-          });
-        });
-    }
-  }
-
-  subscribe() {
-    if (('serviceWorker' in navigator) || ('PushManager' in window)) {
-      Notification.requestPermission()
-        .then((result) => {
-          if (result === 'denied') {
-            console.log('Permission wasn\'t granted. Allow a retry.');
-            return;
-          }
-          if (result === 'default') {
-            console.log('The permission request was dismissed.');
-            return;
-          }
-          console.log('Notification granted', result);
-          this.sendSubscription();
-          this.urlBase64ToUint8Array(document.config.publicKey);
-          // Do something with the granted permission.
-        });
-    }
-  }
-
-  getUserPage() {
-    localStorage.setItem('id_user_profile', this.firebase.auth().currentUser.uid);
-    document.location.href = "http://127.0.0.1:8081/user";
-  }
-
-  getUserProfile(id_user) {
-    console.log(id_user);
-    localStorage.setItem('id_user_profile', id_user);
-    document.location.href = "/user";
-  }
-
-  urlBase64ToUint8Array(base64String) {
-    const padding = '='.repeat((4 - base64String.length % 4) % 4);
-    const base64 = (base64String + padding)
-      .replace(/-/g, '+')
-      .replace(/_/g, '/');
-
-    const rawData = window.atob(base64);
-    const outputArray = new Uint8Array(rawData.length);
-
-    for (let i = 0; i < rawData.length; ++i) {
-      outputArray[i] = rawData.charCodeAt(i);
-    }
-
-    return outputArray;
-  }
-
-  profil() {
-    this.urlBase64ToUint8Array(document.config.publicKey);
-  }
+    sendSubscription() {
+     if (Notification.permission === 'granted') {
+       navigator.serviceWorker.ready
+         .then(registration => {
+           registration.pushManager.subscribe({
+             userVisibleOnly: true,
+             applicationServerKey: this.urlBase64ToUint8Array(document.config.publicKey)
+           }).then(async subscribtion => {
+             subscribtion.id = this.user.uid;
+             await fetch('http://localhost:8085/subscribe', {
+               method: 'POST',
+               headers: {
+                 'Content-Type': 'application/json',
+               },
+               body: JSON.stringify(subscribtion)
+             })
+           });
+         });
+     }
+   }
+   
+     subscribe() {
+       if (('serviceWorker' in navigator) || ('PushManager' in window)) {
+         Notification.requestPermission()
+           .then((result) => {
+             if (result === 'denied') {
+               console.log('Permission wasn\'t granted. Allow a retry.');
+               return;
+             }
+             if (result === 'default') {
+               console.log('The permission request was dismissed.');
+               return;
+             }
+             console.log('Notification granted', result);
+             this.sendSubscription();
+             this.urlBase64ToUint8Array(document.config.publicKey);
+             // Do something with the granted permission.
+           });
+       }
+     }
+   
+     getUserPage(){
+       document.location.href="http://127.0.0.1:8081/user";
+     }
+     
+     urlBase64ToUint8Array(base64String) {
+       const padding = '='.repeat((4 - base64String.length % 4) % 4);
+       const base64 = (base64String + padding)
+         .replace(/-/g, '+')
+         .replace(/_/g, '/');
+    
+       const rawData = window.atob(base64);
+       const outputArray = new Uint8Array(rawData.length);
+    
+       for (let i = 0; i < rawData.length; ++i) {
+         outputArray[i] = rawData.charCodeAt(i);
+       }
+   
+       return outputArray;
+     }
+   
+     profil() {  
+       this.urlBase64ToUint8Array(document.config.publicKey);
+     }
 }
 customElements.define('app-home', Home);

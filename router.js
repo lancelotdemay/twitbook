@@ -18,6 +18,11 @@ const router = new LitRouter([
     name: "comment",
     path: "/comment",
     component: () => import("./js/components/comment/comment.js")
+  },
+  {
+    name: "register",
+    path: "/register",
+    component: () => import("./js/components/data/tweetbook-auth.js")
   }
 ]);
 
