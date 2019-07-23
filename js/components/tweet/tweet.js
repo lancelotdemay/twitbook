@@ -5,119 +5,126 @@ export default class AppTweet extends LitElement {
     super();
   }
 
-  static get styles() {
-    return css`
-      :host {
-        display: block;
-        position: relative;
-      }
-
-      .tweet {
-        background-color: #18242F;
-        padding: 10px;
-        color: white;
-        position: relative;
-        overflow: hidden;
-        border-bottom: 1px solid white;
-      }
-      .tweet a {
-        display: block;
-        text-decoration: none;
-      }
-
-      .tweet figure {
-        position: relative;
-        min-height: 30vh;
-        padding: 0;
-        margin: 0;
-      }
-      .tweet img {
-        display: block;
-        object-fit: cover;
-        width: 100%;
-        height: 100%;
-        max-height: 40vh;
-      }
-      .tweet .placeholder {
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-      }
-      
-      /**
-        * Persist animation using : animation-fill-mode set to forward 
-        * @see https://developer.mozilla.org/en-US/docs/Web/CSS/animation-fill-mode
-        */
-      .fade {
-        -webkit-animation: fadeout 2s forwards; /* Safari and Chrome */
-        -moz-animation: fadeout 2s forwards; /* Firefox */
-        -ms-animation: fadeout 2s forwards; /* Internet Explorer */
-        -o-animation: fadeout 2s forwards; /* Opera */
-        animation: fadeout 2s forwards;
-      }
-
-      /* Key frame animation */
-      @keyframes fadeout {
-        from { opacity: 1; }
-        to   { opacity: 0; }
-      }
-
-      /* Firefox */
-      @-moz-keyframes fadeout {
-        from { opacity: 1; }
-        to   { opacity: 0; }
-      }
-
-      /* Safari and Chrome */
-      @-webkit-keyframes fadeout {
-        from { opacity: 1; }
-        to   { opacity: 0; }
-      }
-
-      @media (min-width: 600px) {
-
-      }
-
-      /* Wide layout: when the viewport width is bigger than 460px, layout
-      changes to a wide layout. */
-      @media (min-width: 460px) {
-        .tweet {
-          flex-basis: 21%;
-        }
-        .tweet figure {
-          min-height: 20vh;
-          height: 20vh;
-          overflow: hidden;
-        }
-      }
-    `;
-  }
-
   static get properties() {
     return {
-      id: { type: Number },
-      username: { type: String },
-      date: { type: String },
-      src: { type: String },
-      text: { type: String },
+      tweet: Object,
+      firebase: Object,
+      moment: Object,
     };
   }
 
-  initTweet(username, src, date, description) {
-    this.username = username;
-    this.date = date;
-    this.src = src;
-    this.description = description;
+  static get styles() {
+    return css`
+    
+    .tweet {
+      background-color: #18242f;
+      color: white;
+      padding: 20px;
+      border: 1px solid white;
+    }
+
+    .comment {
+      margin-right: 20px;
+      border: 1px solid cyan;
+      background-color: #18242f;
+      color: white;
+    }
+
+    .like, .retweet {
+      border: 0px solid;
+      width: 18px;
+      height: 18px;
+      fill: red;
+    }
+    
+    .actions {
+      display:flex;
+      margin-top: 30px;
+    }
+    
+    span {
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+    }
+
+    .tweet-content {
+      margin-right: 20px;
+      margin-top: 10px;
+    }
+    `;
   }
 
-  swapImage() {
-    this.shadowRoot.querySelector('img')
-      .src = this.src;
+  render() {
+    return html`
+    <div class="tweet">
+            <strong>
+            ${this.tweet.user.name} - ${this.getDate(this.tweet.date)}
+            </strong>
+            <br>
+            <span class="tweet-content">${this.tweet.content}</span>
+
+            <div class="actions">
+            <button class="comment" @click="${e => this.comment(this.tweet)}">Commenter</button>
+             ${ this.tweet.likes.find(item => item == this.firebase.auth().currentUser.uid ) ? 
+             html`
+             <span><button @click="${e => this.dislike(this.tweet)}"><img class="like" src="../images/heart.svg" /></button> ${this.tweet.likes_count}</span>
+            `:
+            html`
+             <span><button @click="${e => this.like(this.tweet)}"><img class="like" src="../images/heart_empty.svg" /> </button> ${this.tweet.likes_count != 0 ? this.tweet.likes_count : 0}</span>
+            `
+           }
+           ${ this.tweet.retweets.find(item => item == this.firebase.auth().currentUser.uid ) ? 
+             html`
+             <span><button @click="${e => this.unretweet(this.tweet)}"><img class="retweet" src="../images/unretweet.svg" /></button> ${this.tweet.retweets_count}</span>
+            `:
+            html`
+             <span><button @click="${e => this.retweet(this.tweet)}"><img class="retweet" src="../images/retweet.svg" /> </button> ${this.tweet.retweets_count != 0 ? this.tweet.retweets_count : 0}</span>
+            `}
+            </div>
+           </div>`
+  }
+
+  like(tweet) {
+    this.tweet = null;
+    this.tweet = tweet
+    this.tweet.likes_count += 1
+    this.tweet.likes.push(this.firebase.auth().currentUser.uid)
+    this.dispatchEvent(new CustomEvent('like-event', { detail: tweet }))
+  }
+ 
+  dislike(tweet) {
+    this.tweet = null;
+    this.tweet = tweet
+    this.tweet.likes_count -= 1
+
+    let index = this.tweet.likes.indexOf(tweet)
+    this.tweet.likes.splice(index, 1)
+
+    this.dispatchEvent(new CustomEvent('dislike-event', { detail: tweet }))
+ }
+ 
+ retweet(tweet) {
+  this.tweet = null;
+  this.tweet = tweet
+  this.tweet.retweets_count += 1
+  this.tweet.retweets.push(this.firebase.auth().currentUser.uid)
+  this.dispatchEvent(new CustomEvent('retweet-event', { detail: tweet }))
+ }
+ 
+ unretweet(tweet) {
+  this.tweet = null;
+  this.tweet = tweet
+  this.tweet.retweets_count -= 1
+
+  let index = this.tweet.retweets.indexOf(tweet)
+  this.tweet.retweets.splice(index, 1)
+
+  this.dispatchEvent(new CustomEvent('unretweet-event', { detail: tweet }))
+ }
+
+  getDate(timestamp) {
+    return this.moment(timestamp).fromNow()
   }
 }
 

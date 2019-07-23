@@ -3,13 +3,7 @@ import { LitElement, html } from '../../../node_modules/lit-element/lit-element.
 export default class AppUser extends LitElement {
     constructor() {
       super();
-      this.username = "";
-      this.password = "";
-      this.name = "";
-      this.email = "";
-      this.firstname = "";
-      this.birthdate = "";
-      this.creation_date = "";
+      this.user = null
       this.firebase = null;
       this.tweets = [];
       this.moment = null;
@@ -17,30 +11,21 @@ export default class AppUser extends LitElement {
 
     static get properties() {
         return {
-          username: { type: String },
-          password: { type: String },
-          name: { type: String },
-          email: { type: String },
-          firstname: { type: String },
-          birthdate: { type: Date },
-          creation_date: { type: Date },
-          firebase: {type: Object },
+          user: Object,
+          firebase: Object,
           tweets: Array,
           moment: Object
         };
     }
 
     render() {
-      console.log(this.firebase);
-      console.log(this.firebase.uid);
-      console.log(this.tweets);
       return html`
         <div class="">
           <div>
             ${this.firebase.displayName}
           </div>
           <div>
-          <p>X Abonnements </p> <p> X Abonnés </p>
+          <p>${this.user.followers_count} Abonnements </p> <p> ${this.user.follows_count} Abonnés </p>
           </div>
           ${this.tweets.map(tweet =>  html` 
           ${tweet.user.id == this.firebase.uid ? html`

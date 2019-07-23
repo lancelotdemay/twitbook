@@ -13,6 +13,11 @@ const router = new LitRouter([
     name: "me",
     path: "/me",
     component: () => import("./js/components/user/user.js")
+  },
+  {
+    name: "comment",
+    path: "/comment",
+    component: () => import("./js/components/comment/comment.js")
   }
 ]);
 

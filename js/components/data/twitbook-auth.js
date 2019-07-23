@@ -40,7 +40,16 @@ export class TwitbookAuth extends LitElement {
         this.auth.createUserWithEmailAndPassword(this.email, this.password).then(response => {
             let user = response.user
 
-            console.log(this.username)
+            firebase.firestore().collection('users').add({
+                'user_id': user.uid,
+                'follows': [],
+                'follows_count': 0,
+                'followers': [],
+                'followers_count': 0
+            }).then(response => {
+                console.log(response)
+            })
+           
             user.updateProfile({
                 displayName: this.username
             })

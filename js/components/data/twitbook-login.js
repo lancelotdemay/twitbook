@@ -46,7 +46,7 @@ export class TwitbookLogin extends LitElement {
         this.auth.signInWithEmailAndPassword(this.email, this.password)
         .then(user => {
             localStorage.setItem('logged', true);
-            console.log(user)
+            localStorage.setItem('user', JSON.stringify(user))
         })
     }
 
