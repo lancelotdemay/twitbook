@@ -38,5 +38,6 @@ export class TwitbookStore extends LitElement {
             });
         });
     }
+
 }
 customElements.define('twitbook-store', TwitbookStore);

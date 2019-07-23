@@ -47,7 +47,27 @@ class TwitbookApp extends LitElement {
 
  static get styles() {
     return css`
-    
+    header {
+      height: 48px;
+      display: flex;
+      border-bottom: solid 1px #eeeeee;
+      background-color: #1B2938;
+      color: white;
+  }
+
+  header span {
+      flex-grow: 1;
+      margin: auto;
+      text-align: center;
+  }
+
+  header button {
+    color: white;
+  }
+
+  button {
+  
+  }
     `;
   }
 
@@ -63,7 +83,15 @@ class TwitbookApp extends LitElement {
 
  handleLogin(e) {
     this.user = e.detail.user;
+    console.log(this.user)
     this.logged = localStorage.getItem('logged') == 'true' ? true : false;
+ }
+
+ logout() {
+    firebase.auth().signOut().then(res => {
+      this.logged = false
+      localStorage.setItem('logged', this.logged)
+    })
  }
 
 
@@ -73,14 +101,14 @@ class TwitbookApp extends LitElement {
 
  sendTweet(e) {
    this.database = firebase.firestore();
-
+  
    this.database.collection('tweets').add({
      content: e.detail,
      user: {
          id: this.user.uid,
-         name: this.user.displayName
+         name: this.user.displayName,
+          email: this.user.email,
       },
-     email: this.user.email,
      likes_count: 0,
      retweets_count: 0,
      likes: [],
@@ -100,35 +128,34 @@ class TwitbookApp extends LitElement {
    
 like(tweet) {
     firebase.firestore().collection("tweets").doc(tweet.id).update({
-      "likes": firebase.firestore.FieldValue.arrayUnion(firebase.auth().currentUser.uid),
+      "likes": tweet.likes,
       "likes_count": tweet.likes_count
     })
 }
 
 dislike(tweet) {
   firebase.firestore().collection("tweets").doc(tweet.id).update({
-    "likes": firebase.firestore.FieldValue.arrayRemove(firebase.auth().currentUser.uid),
+    "likes": tweet.likes,
     "likes_count": tweet.likes_count
   })
 }
 
 retweet(tweet) {
-  firebase.firestore().collection('retweets').add({
-    tweet_id: tweet.id,
-    user_id: firebase.auth().currentUser.uid
- })
- this.retweets = [...this.retweets, tweet.id]
- localStorage.setItem('retweets', JSON.stringify(this.retweets))
+  firebase.firestore().collection("tweets").doc(tweet.id).update({
+    "retweets": tweet.retweets,
+    "retweets_count": tweet.retweets_count
+  })
 }
 
 unretweet(tweet) {
-  firebase.firestore().collection('retweets').where('tweet_id', '==', tweet.id).where('user_id', '==', firebase.auth().currentUser.uid).get().then(snapshot => {
-    snapshot.forEach(function(doc) {
-      doc.ref.delete();
-    });
+  firebase.firestore().collection("tweets").doc(tweet.id).update({
+    "retweets": tweet.retweets,
+    "retweets_count": tweet.retweets_count
   })
-  this.retweets = this.retweets.filter(item => item != tweet.id)
-  localStorage.setItem('retweets', JSON.stringify(this.retweets))
+}
+
+comment() {
+  window.location.href = "/comment"
 }
 
 
@@ -137,14 +164,21 @@ unretweet(tweet) {
    <twitbook-store
        collection="tweets"
        @child-changed="${this.tweetAdded}"></twitbook-store>
-       <slot name="header"></slot>
+       <header slot="header"><span style="${this.logged ? 'margin-left: 84px;': ''}">Twitbook </span> ${ this.logged ? html`<button class="logout" @click="${e => this.logout()}">Déconnexion</button>`: html``}</header>
     <main id="view">
      ${ this.logged ? html`
       <app-user name="me" 
+      .user="${this.user}"
       .moment="${moment}" 
       .tweets="${this.tweets}" 
       .firebase="${ firebase.auth().currentUser}" 
       ?active="${this.page == 'me'}"></app-user>
+      <app-comment 
+      .firebase="${firebase}"  
+      .user="${this.user}"
+      .moment="${moment}" 
+      name="comment" 
+      ?active="${this.page == "comment"}"></app-comment>
       <app-home 
       name="home" .tweets="${this.tweets}" 
       @like-event="${e => {this.like(e.detail);}}" 
@@ -152,6 +186,7 @@ unretweet(tweet) {
       @retweet-event="${e => {this.retweet(e.detail);}}" 
       @unretweet-event="${e => {this.unretweet(e.detail);}}"
       @tweet-sent="${e => {this.sendTweet(e);}}"
+      @comment-event="${e => {this.comment()}}"
       .firebase="${firebase}" 
       .moment="${moment}" 
       .retweets="${this.retweets}"
